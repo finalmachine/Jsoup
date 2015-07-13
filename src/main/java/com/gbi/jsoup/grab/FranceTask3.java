@@ -191,7 +191,7 @@ public class FranceTask3 {
 					break;
 				}
 			}
-			page = (int) task.get("page");
+			page = (Integer) task.get("page");
 			cal1.setTime((Date)task.get("date1"));
 			cal2.setTime((Date)task.get("date2"));
 		}

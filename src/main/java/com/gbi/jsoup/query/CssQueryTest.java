@@ -11,7 +11,7 @@ import com.gbi.jsoup.util.ResourceUtil;
 
 public class CssQueryTest {
 
-	private static void test1() throws IOException {
+	public static void test1() throws IOException {
 		System.out.println("------test1----->\n");
 		File file = ResourceUtil.getSelfFile(CssQueryTest.class, "test1.html");
 		Document dom = Jsoup.parse(file, "UTF-8");
@@ -25,7 +25,7 @@ public class CssQueryTest {
 		System.out.println("\n<-----test1------");
 	}
 	
-	private static void test2() throws IOException {
+	public static void test2() throws IOException {
 		System.out.println("------test2----->\n");
 		File file = ResourceUtil.getSelfFile(CssQueryTest.class, "test2.html");
 		Document dom = Jsoup.parse(file, "UTF-8");
@@ -48,7 +48,7 @@ public class CssQueryTest {
 		System.out.println("\n<-----test2------");
 	}
 	
-	private static void test3() throws IOException {
+	public static void test3() throws IOException {
 		System.out.println("------test3----->\n");
 		File file = ResourceUtil.getSelfFile(CssQueryTest.class, "test3.html");
 		Document dom = Jsoup.parse(file, "UTF-8");
@@ -57,7 +57,7 @@ public class CssQueryTest {
 		System.out.println("\n<-----test3------");
 	}
 	
-	private static void test4() throws IOException {
+	public static void test4() throws IOException {
 		System.out.println("------test4----->\n");
 		File file = ResourceUtil.getSelfFile(CssQueryTest.class, "test4.html");
 		Document dom = Jsoup.parse(file, "UTF-8");
@@ -68,7 +68,7 @@ public class CssQueryTest {
 		System.out.println("\n<-----test4------");
 	}
 	
-	private static void test5() throws IOException {
+	public static void test5() throws IOException {
 		System.out.println("------test5----->\n");
 		File file = ResourceUtil.getSelfFile(CssQueryTest.class, "test5.html");
 		Document dom = Jsoup.parse(file, "UTF-8");
@@ -78,11 +78,16 @@ public class CssQueryTest {
 		System.out.println("\n<-----test5------");
 	}
 	
+	public static void test6() throws IOException {
+		
+	}
+	
 	public static void main(String[] args) throws IOException {
 		test1();
 		test2();
 		test3();
 		test4();
 		test5();
+		test6();
 	}
 }

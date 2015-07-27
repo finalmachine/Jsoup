@@ -13,7 +13,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.cookie.Cookie;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -34,11 +33,11 @@ public class FranceTask3 {
 
 	private static final String entryUrl = "https://www.transparence.sante.gouv.fr/flow/interrogationAvancee?execution=e1s1";
 	private static final String entryUrlpre = "https://www.transparence.sante.gouv.fr/flow/interrogationAvancee";
-	private static final String recordTable = "Recherche_avancee_p_record";// 记录任务的
-	private static final String restoreTable = "Recherche_avancee_p";// 存储数据的
+	private static final String recordTable = "Payment_France_record";// 记录任务的
+	private static final String restoreTable = "Payment_France";// 存储数据的
 	private static final String mongoAddr = "127.0.0.1";
 	private static final int mongoPort = 27017;
-	
+
 	private static DBCollection collection1 = null; // 记录任务的
 	private static DBCollection collection2 = null; // 存储数据的
 	private static DBObject task = null;
@@ -49,16 +48,16 @@ public class FranceTask3 {
 	private static SimpleHttpClient client = null;
 	private static Cookie cookie = null;
 	private static Iterator<Element> iterator = null;
-	
+
 	private static Element currentOption = null;
 	private static Calendar cal1 = Calendar.getInstance();
 	private static Calendar cal2 = Calendar.getInstance();
 	private static Calendar endTime = Calendar.getInstance(); // 抓捕数据的最大日期
-	private static int page = 1;  // 记录当前带读取的页面
-	
+	private static int page = 1; // 记录当前带读取的页面
+
 	private static boolean normalExit = true; // 表示程序是否完美结束
 	private static SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-	
+
 	private static int loop2 = 0;
 	private static int count = 0; // 单次执行存入数据库的数据条数
 	private static int re = 0; // 单次执行存入数据库时重复的条数
@@ -70,11 +69,12 @@ public class FranceTask3 {
 	private static void reportError(SimpleHttpErrorInfo info) {
 		normalExit = false;
 		System.out.println(info);
-		JOptionPane.showMessageDialog(null, new JLabel("<html><font face='微软雅黑' size='5' color='red'>"
-				+ info.getInfo() + "</font></html>"), "T_T", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(null,
+				new JLabel("<html><font face='微软雅黑' size='5' color='red'>" + info.getInfo() + "</font></html>"), "T_T",
+				JOptionPane.ERROR_MESSAGE);
 		System.exit(1);
 	}
-	
+
 	private boolean timeBefore(Calendar c1, Calendar c2) {
 		if (c1.get(Calendar.YEAR) < c2.get(Calendar.YEAR)) {
 			return true;
@@ -88,7 +88,9 @@ public class FranceTask3 {
 
 	private void prepareData(HashMap<String, String> data) {
 		data.put("form", "form");
-		data.put("form:denominationSociale-autocomplete", "PFIZER INTERNATIONAL OPERATIONS ; PFIZER SANTE FAMILIALE ; PFIZER SAS ; ");//Astrazeneca ; 
+		data.put("form:denominationSociale-autocomplete",
+				"MERCK MEDICATION FAMILIALE ; MERCK SANTE ; MERCK SERONO ; ");
+			//	"PFIZER INTERNATIONAL OPERATIONS ; PFIZER SANTE FAMILIALE ; PFIZER SAS ; ");// Astrazeneca
 		data.put("form:regionEntreprise", "Sélectionner une région");
 		data.put("form:departementEntreprise", "Sélectionner un département");// currentOption2.val()
 		data.put("form:paysEntreprise", currentOption.val());
@@ -154,13 +156,13 @@ public class FranceTask3 {
 		}
 		begin = option1.val();
 		end = option2.val();
-		endTime.set(2015, 6, 1);//TODO
+		endTime.set(2015, 6, 1);// TODO
 		// 初始化iterator
 		iterator = options.iterator();
 
 		// get value from mongo >
 		MongoClient client = new MongoClient(mongoAddr, mongoPort);
-		DB db = client.getDB("france");
+		DB db = client.getDB("NAVISUS");
 		collection1 = db.getCollection(recordTable);
 		collection2 = db.getCollection(restoreTable);
 		DBObject query = new BasicDBObject();
@@ -177,8 +179,8 @@ public class FranceTask3 {
 			}
 			task.put("option", currentOption.text());
 			task.put("page", 1);
-			cal1.set(2012, 5, 30);//TODO
-			cal2.set(2012, 6, 1);//TODO
+			cal1.set(2012, 5, 30);// TODO
+			cal2.set(2012, 6, 1);// TODO
 			task.put("date1", cal1.getTime());
 			task.put("date2", cal2.getTime());
 			collection1.save(task);
@@ -192,11 +194,10 @@ public class FranceTask3 {
 				}
 			}
 			page = (Integer) task.get("page");
-			cal1.setTime((Date)task.get("date1"));
-			cal2.setTime((Date)task.get("date2"));
+			cal1.setTime((Date) task.get("date1"));
+			cal2.setTime((Date) task.get("date2"));
 		}
 		// get value from mongo <
-		
 		// begin grab
 		grabStep1();
 	}
@@ -209,7 +210,7 @@ public class FranceTask3 {
 			// 准备URL地址
 			List<Cookie> cookies = client.getCookieStore().getCookies();
 			cookie = cookies.get(cookies.size() - 1);
-			url = entryUrlpre+";"+cookie.getName().toLowerCase()+"="+cookie.getValue()+"?execution=e1s1";
+			url = entryUrlpre + ";" + cookie.getName().toLowerCase() + "=" + cookie.getValue() + "?execution=e1s1";
 			SimpleHttpResponse content = tryToAttach(url, data);
 			System.out.println("试图更新");
 			switch (checkResponse(content, url)) {
@@ -226,17 +227,17 @@ public class FranceTask3 {
 				grabStep2(content, true, true);
 				System.out.println("count:" + count);
 				page = 1;
-			//	grabStep2(content, false, true);TODO
-			//	System.out.println("count:" + count);TODO
-			//	page = 1;TODO
+				// grabStep2(content, false, true);TODO
+				// System.out.println("count:" + count);TODO
+				// page = 1;TODO
 				tryToAttach(url, null); // 保持首页不过期
 				cal1.add(Calendar.DAY_OF_MONTH, 2); // 日期向后两天
 				cal2.add(Calendar.DAY_OF_MONTH, 2);
 				if (!timeBefore(cal2, endTime)) {
 					if (iterator.hasNext()) {
 						currentOption = iterator.next();
-						cal1.set(2012, 5, 30);//TODO
-						cal2.set(2012, 6, 1);//TODO
+						cal1.set(2012, 5, 30);// TODO
+						cal2.set(2012, 6, 1);// TODO
 						task.put("option", currentOption.text());
 						System.out.println("切换之后：" + currentOption.text());
 					} else {
@@ -259,14 +260,13 @@ public class FranceTask3 {
 		}
 	}
 
-
 	private void grabStep2(final SimpleHttpResponse content, boolean main, boolean firstPage) {
 		SimpleHttpResponse content1 = content;// 拷贝content指针
 		// 准备存储网页数据的空间
 		Elements inputs = null;
 		Element input = null;
 		String key1 = null, key2 = null, val1 = null, val2 = null;
-		
+
 		// 如果是标签2 跳转至标签2 >
 		if (main == false && firstPage) {
 			inputs = content.getDocument().select("form#j_idt17>input");
@@ -307,18 +307,19 @@ public class FranceTask3 {
 				return;
 			}
 		} // 如果是标签2 跳转至标签2 <
-		
+
 		// 查看可采集数据是否为0 如果是的 直接结束 >
 		char c = 160;
-		int total = Integer.parseInt(content1.getDocument().select("form#j_idt17>fieldset>div>legend>span")
-				.first().text().trim().replaceAll("[" + c + "]", ""));
+		int total = Integer.parseInt(content1.getDocument().select("form#j_idt17>fieldset>div>legend>span").first()
+				.text().trim().replaceAll("[" + c + "]", ""));
 		System.out.println("total:" + total);
 		if (total == 0) {
-			System.out.println("<--grabStep2--" + "-" + currentOption.text() + "-" + format.format(cal1.getTime()) + (main ? "--1" : "--2"));
+			System.out.println("<--grabStep2--" + "-" + currentOption.text() + "-" + format.format(cal1.getTime())
+					+ (main ? "--1" : "--2"));
 			return;
 		}
 		// 查看可采集数据是否为0 如果是的 直接结束 <
-		
+
 		// 查看page与网页上的页码是否一致 >
 		if (Integer.parseInt(content1.getDocument().select("li.btn-page>input[disabled]").first().val()) != page) {
 			System.out.println("page:" + page);
@@ -328,12 +329,12 @@ public class FranceTask3 {
 				reportError(new SimpleHttpErrorInfo(content1.getUrl(), "网页格式变了,我罢工了"));
 				return;
 			}
-			
+
 			key1 = inputs.get(0).attr("name");
 			val1 = inputs.get(0).val();
 			key2 = inputs.get(1).attr("name");
 			val2 = inputs.get(1).val();
-			
+
 			String url = content1.getUrl();
 			loop2 = 0;
 			int pageNow = 1;
@@ -357,7 +358,8 @@ public class FranceTask3 {
 				content1 = tryToAttach(url, data);
 				switch (checkResponse(content1, url)) {
 				case 4:
-					pageNow = Integer.parseInt(content1.getDocument().select("li.btn-page>input[disabled]").first().val());
+					pageNow = Integer
+							.parseInt(content1.getDocument().select("li.btn-page>input[disabled]").first().val());
 					loop2 = 0;
 					break;
 				default:
@@ -373,11 +375,11 @@ public class FranceTask3 {
 			}
 		}
 		// 查看page与网页上的页码是否一致 <
-		
+
 		// 循环捕获所有的页面的input >
 		while (page <= (total + 19) / 20) {
-			System.out.println("--grabStep2" + "-" + currentOption.text() + "-" + format.format(cal1.getTime()) + "--page:"
-					+ content1.getDocument().select("li.btn-page>input[disabled]").first().val()
+			System.out.println("--grabStep2" + "-" + currentOption.text() + "-" + format.format(cal1.getTime())
+					+ "--page:" + content1.getDocument().select("li.btn-page>input[disabled]").first().val()
 					+ (main ? "--1" : "--2") + "-->");
 
 			inputs = content1.getDocument().select("form#j_idt17>input");
@@ -391,11 +393,9 @@ public class FranceTask3 {
 			val2 = inputs.get(1).val();
 			// 找到对应的table里面的所有input >
 			if (main) {
-				inputs = content1.getDocument().select(
-						"table[id=j_idt17:dataTable]>tbody>tr>td:eq(6)>input");
+				inputs = content1.getDocument().select("table[id=j_idt17:dataTable]>tbody>tr>td:eq(6)>input");
 			} else {
-				inputs = content1.getDocument().select(
-						"table[id=j_idt17:dataTable2]>tbody>tr>td:eq(6)>input");
+				inputs = content1.getDocument().select("table[id=j_idt17:dataTable2]>tbody>tr>td:eq(6)>input");
 			}
 			if (inputs == null) {
 				reportError(new SimpleHttpErrorInfo(content1.getUrl(), "网页格式变了,我罢工了"));
@@ -426,8 +426,7 @@ public class FranceTask3 {
 						break;
 					default:
 						System.out.println("default");
-						printError(new SimpleHttpErrorInfo(content1.getUrl(), "我也不知道为什么会来到这里",
-							HttpMethod.POST, data));
+						printError(new SimpleHttpErrorInfo(content1.getUrl(), "我也不知道为什么会来到这里", HttpMethod.POST, data));
 						++loop2;
 						break;
 					}
@@ -437,7 +436,7 @@ public class FranceTask3 {
 				}
 			}
 			// 遍历该页的input存入数据库 <
-			
+
 			++page;
 			task.put("page", page);
 			collection1.save(task);
@@ -478,28 +477,34 @@ public class FranceTask3 {
 
 	private void grabStep3(final SimpleHttpResponse content) {
 		DBObject json = new BasicDBObject();
-		Elements ps = content.getDocument().select(
-				"form#j_idt17>fieldset:eq(3)>div[class=section-content]>p");
+		DBObject entreprise = new BasicDBObject();
+		Elements ps = content.getDocument().select("form#j_idt17>fieldset:eq(3)>div[class=section-content]>p");
 		for (Element p : ps) {
-			json.put(p.select(">label").first().text(), p.select(">input").first().val());
+			entreprise.put(p.select(">label").first().text(), p.select(">input").first().val());
 		}
+		DBObject bénéficiaire = new BasicDBObject();
 		ps = content.getDocument().select("form#j_idt17>fieldset:eq(4)>div[class=section-content]>p");
 		for (Element p : ps) {
 			if (p.select(">input").first() == null) {
 				continue;
 			}
-			json.put(p.select(">label").first().text(), p.select(">input").first().val());
+			bénéficiaire.put(p.select(">label").first().text(), p.select(">input").first().val());
 		}
+		DBObject avantage = new BasicDBObject();
 		ps = content.getDocument().select("form#j_idt17>fieldset:eq(5)>div[class=section-content]>p");
 		for (Element p : ps) {
-			json.put(p.select(">label").first().text(), p.select(">input").first().val());
+			avantage.put(p.select(">label").first().text(), p.select(">input").first().val());
 		}
-		json.put("_id", DigestUtils.md5Hex(json.toString()));
+		json.put("_id", avantage.get("Identifiant"));
+		json.put("entreprise", entreprise);
+		json.put("bénéficiaire", bénéficiaire);
+		json.put("avantage", avantage);
+		json.put("html", content.toString());
 		if (collection2.save(json).isUpdateOfExisting()) {
 			++re;
 			System.out.println("一共重复：" + re);
 		} else {
-		//	System.out.println(++count + "," + re);
+			// System.out.println(++count + "," + re);
 			++count;
 		}
 		// 循环捕获所有的页面的input <
@@ -557,7 +562,7 @@ public class FranceTask3 {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @param content
@@ -576,7 +581,7 @@ public class FranceTask3 {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		
+
 		if (con == null) {
 			reportError(new SimpleHttpErrorInfo(img.absUrl("src"), "找不到验证图片，网速不好"));
 			return null;
@@ -626,7 +631,6 @@ public class FranceTask3 {
 		}
 	}
 
-
 	public static void main(String[] args) throws IOException {
 		FranceTask3 frame = new FranceTask3();
 		frame.run();
@@ -635,6 +639,6 @@ public class FranceTask3 {
 		} else {
 			System.out.println("interupt");
 		}
-		//MERCK MEDICATION FAMILIALE ; MERCK SANTE ; MERCK SERONO ; 
+		// MERCK MEDICATION FAMILIALE ; MERCK SANTE ; MERCK SERONO ;
 	}
 }

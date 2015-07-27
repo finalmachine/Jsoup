@@ -499,7 +499,7 @@ public class FranceTask3 {
 		json.put("entreprise", entreprise);
 		json.put("bénéficiaire", bénéficiaire);
 		json.put("avantage", avantage);
-		json.put("html", content.toString());
+		json.put("html", content.getDocument().toString());
 		if (collection2.save(json).isUpdateOfExisting()) {
 			++re;
 			System.out.println("一共重复：" + re);

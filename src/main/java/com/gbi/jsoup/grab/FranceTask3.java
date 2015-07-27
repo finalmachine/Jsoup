@@ -310,8 +310,9 @@ public class FranceTask3 {
 
 		// 查看可采集数据是否为0 如果是的 直接结束 >
 		char c = 160;
-		int total = Integer.parseInt(content1.getDocument().select("form#j_idt17>fieldset>div>legend>span").first()
-				.text().trim().replaceAll("[" + c + "]", ""));
+		String temp = content1.getDocument().select("form#j_idt17>fieldset>div>legend>span").first()
+				.text().trim().replaceAll("[" + c + "]", "").replaceAll("[,]", "");
+		int total = Integer.parseInt(temp);
 		System.out.println("total:" + total);
 		if (total == 0) {
 			System.out.println("<--grabStep2--" + "-" + currentOption.text() + "-" + format.format(cal1.getTime())

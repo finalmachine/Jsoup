@@ -22,8 +22,8 @@ import org.jsoup.select.Elements;
 import com.gbi.commons.util.gui.IdentifyingCodeDialog;
 import com.gbi.commons.model.SimpleHttpErrorInfo;
 import com.gbi.commons.net.http.HttpMethod;
-import com.gbi.commons.net.http.SimpleHttpClient;
-import com.gbi.commons.net.http.SimpleHttpResponse;
+import com.gbi.commons.net.http.BasicHttpClient;
+import com.gbi.commons.net.http.BasicHttpResponse;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -48,7 +48,7 @@ public class FranceTask2 {
 	private static String end = null;
 	private static int page = 1;
 	private static boolean normalExit = true;
-	private SimpleHttpClient client = null;
+	private BasicHttpClient client = null;
 	private Elements options = null;
 	private SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
 	private Calendar cal1 = null;
@@ -118,9 +118,9 @@ public class FranceTask2 {
 	}
 
 	private void run() throws IOException {
-		client = new SimpleHttpClient();
+		client = new BasicHttpClient();
 		
-		SimpleHttpResponse content = null;
+		BasicHttpResponse content = null;
 		content = tryToAttach(entryUrl, null);
 
 		switch (checkResponse(content, entryUrl)) {
@@ -218,7 +218,7 @@ public class FranceTask2 {
 					.get(client.getCookieStore().getCookies().size() - 1);
 			url = entryUrlpre + ";" + cookie.getName().toLowerCase() + "=" + cookie.getValue() + "?execution=e1s1";
 		//	System.out.println(url);
-			SimpleHttpResponse content = tryToAttach(url, data);
+			BasicHttpResponse content = tryToAttach(url, data);
 			System.out.println("...");
 			switch (checkResponse(content, url)) {
 			case 2:
@@ -263,8 +263,8 @@ public class FranceTask2 {
 		}
 	}
 
-	private void grabStep2(final SimpleHttpResponse content, boolean main, boolean firstPage) {
-		SimpleHttpResponse content1 = content;
+	private void grabStep2(final BasicHttpResponse content, boolean main, boolean firstPage) {
+		BasicHttpResponse content1 = content;
 
 		// 如果是标签2 跳转至标签2
 		if (main == false && firstPage) {
@@ -395,7 +395,7 @@ public class FranceTask2 {
 				data.put(key1, val1);
 				data.put(key2, val2);
 				data.put(input.attr("name"), input.val());
-				SimpleHttpResponse con = null;
+				BasicHttpResponse con = null;
 				con = tryToAttach(content1.getUrl(), data);
 				switch (checkResponse(con, content1.getUrl())) {
 				case 1: // TODO
@@ -497,7 +497,7 @@ public class FranceTask2 {
 		}
 	}
 
-	private void grabStep3(final SimpleHttpResponse content) {
+	private void grabStep3(final BasicHttpResponse content) {
 		DBObject json = new BasicDBObject();
 		Elements ps = content.getDocument().select(
 				"form#j_idt17>fieldset:eq(3)>div[class=section-content]>p");
@@ -525,12 +525,12 @@ public class FranceTask2 {
 		}
 	}
 
-	private SimpleHttpResponse tryToAttach(String url, Map<String, String> data) {
+	private BasicHttpResponse tryToAttach(String url, Map<String, String> data) {
 		int times = 0;
 		if (data == null) {
 			while (times < 10) {
 				try {
-					SimpleHttpResponse response = client.get(url, false);
+					BasicHttpResponse response = client.get(url, false);
 					if (client.getLastStatus() == 200) {
 						return response;
 					} else {
@@ -551,7 +551,7 @@ public class FranceTask2 {
 		} else {
 			while (times < 10) {
 				try {
-					SimpleHttpResponse response = client.post(url, data, false);
+					BasicHttpResponse response = client.post(url, data, false);
 					if (client.getLastStatus() == 200) {
 						return response;
 					} else {
@@ -578,13 +578,13 @@ public class FranceTask2 {
 		return null;
 	}
 	
-	private SimpleHttpResponse showDialog(final SimpleHttpResponse content) {
+	private BasicHttpResponse showDialog(final BasicHttpResponse content) {
 		Element img = content.getDocument().select("div.section-content>img").first();
 		if (img == null) {
 			reportError(new SimpleHttpErrorInfo(content.getUrl(), "找不到验证码，蛋疼啊"));
 			return null;
 		}
-		SimpleHttpResponse con = null;
+		BasicHttpResponse con = null;
 		try {
 			con = client.get(img.absUrl("src"));
 		} catch (Exception e) {
@@ -624,7 +624,7 @@ public class FranceTask2 {
 	 * @param targetUrl
 	 * @return 1 空 2 选项网页 3 验证码网页，内部已经刷新验证码 4 捕获数据的2级网页 5 捕获数据的3级网页 6未知的网页
 	 */
-	public static int checkResponse(SimpleHttpResponse content, String targetUrl) {
+	public static int checkResponse(BasicHttpResponse content, String targetUrl) {
 		if (content == null) {
 			return 1;
 		} else if (content.getDocument().select("select[id=form:regionEntreprise]>option").size() > 0) {

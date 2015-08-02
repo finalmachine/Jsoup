@@ -34,7 +34,7 @@ public class FranceTask3 {
 	private static final String entryUrl = "https://www.transparence.sante.gouv.fr/flow/interrogationAvancee?execution=e1s1";
 	private static final String entryUrlpre = "https://www.transparence.sante.gouv.fr/flow/interrogationAvancee";
 	private static final String recordTable = "Payment_France_record";// 记录任务的
-	private static final String restoreTable = "Payment_France";// 存储数据的
+	private static final String restoreTable = "Payment_France_1";// 存储数据的
 	private static final String mongoAddr = "127.0.0.1";
 	private static final int mongoPort = 27017;
 
@@ -89,8 +89,9 @@ public class FranceTask3 {
 	private void prepareData(HashMap<String, String> data) {
 		data.put("form", "form");
 		data.put("form:denominationSociale-autocomplete",
-				"MERCK MEDICATION FAMILIALE ; MERCK SANTE ; MERCK SERONO ; ");
-			//	"PFIZER INTERNATIONAL OPERATIONS ; PFIZER SANTE FAMILIALE ; PFIZER SAS ; ");// Astrazeneca
+			//	"MERCK MEDICATION FAMILIALE ; MERCK SANTE ; MERCK SERONO ; ");
+				"PFIZER INTERNATIONAL OPERATIONS ; PFIZER SANTE FAMILIALE ; PFIZER SAS ; ");
+			//	"Astrazeneca"
 		data.put("form:regionEntreprise", "Sélectionner une région");
 		data.put("form:departementEntreprise", "Sélectionner un département");// currentOption2.val()
 		data.put("form:paysEntreprise", currentOption.val());
